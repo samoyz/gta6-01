@@ -2,6 +2,7 @@
 // the HUD with its minimap and wanted stars, and the title, pause and end screens.
 import { AVENUES, BEACH_X, CAR_TYPES, LANDMARKS, PALETTE, PLAYER, SEA_X, SPRAY_PRICE, STREETS, WORLD } from './config.js';
 import { MISSIONS, currentObjective } from './missions.js';
+import { virtualButtons } from './input.js';
 
 const FONT = 'system-ui, -apple-system, "Segoe UI", sans-serif';
 
@@ -521,8 +522,8 @@ function drawHUD(ctx, G) {
     ctx.font = `11px ${FONT}`;
     ctx.fillText('ENTER: dismiss', W / 2 - 264, H - 96);
   }
-  // Minimap, bottom left.
-  drawMinimap(ctx, G, 20, H - 168, 186, 136);
+  // Minimap, top left below the cash panel (bottom left is the D-pad now).
+  drawMinimap(ctx, G, 20, 88, 186, 136);
   // Speed and car, bottom right.
   const car = p.car;
   panel(ctx, W - 214, H - 84, 200, 70);
@@ -573,6 +574,28 @@ function drawHUD(ctx, G) {
     ctx.textAlign = 'center';
     ctx.fillText('WASD drive / walk · E enter car · F or click shoot · SPACE handbrake · ESC pause · M mute', W / 2, H - 84);
     ctx.textAlign = 'left';
+  }
+  // On-screen buttons: D-pad bottom left, E bottom right. Mouse and touch.
+  if (G.mode === 'play') {
+    for (const b of virtualButtons(W, H)) {
+      const cx = b.x + b.w / 2;
+      const cy = b.y + b.h / 2;
+      const r = Math.min(b.w, b.h) / 2;
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(0,0,0,0.45)';
+      ctx.fill();
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = 'rgba(255,255,255,0.65)';
+      ctx.stroke();
+      ctx.fillStyle = 'rgba(255,255,255,0.9)';
+      ctx.font = `bold ${b.code === 'KeyE' ? 26 : 20}px ${FONT}`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(b.label, cx, cy + 1);
+      ctx.textBaseline = 'alphabetic';
+      ctx.textAlign = 'left';
+    }
   }
 }
 
