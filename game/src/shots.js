@@ -1,79 +1,188 @@
-// The screenshot scenes behind ?shot=start|play|end. Each one plays the real rules forward from a
-// fresh world for a fixed number of steps, steered by a simple autopilot (look ahead each way the
-// paddle could move, keep clear of blocks, chase the lowest coin when that is safe), so the frame
-// is what a short game really looks like and the same seed always gives the same frame.
-import { FIELD, PLAYER, STEP } from './config.js';
-import { EVENT_OVER, KIND_BLOCK } from './world.js';
-import { SCREEN_OVER, SCREEN_PLAY, SCREEN_TITLE } from './render.js';
+// The screenshot scenes behind ?shot=title|chase|drive|foot. Each one plays the
+// real rules forward from a fresh world for a fixed number of steps, steered by
+// a simple autopilot that follows the road ahead, so the frame is what a short
+// game really looks like and the same seed always gives the same frame.
+import { LANDMARKS, STEP } from './config.js';
+import { makeCar, resolveBumps, updateParticles, updatePedestrians, updatePlayerCar, updatePlayerOnFoot, updatePolice, updateTraffic } from './entities.js';
+import { startMission } from './missions.js';
 
-const START_SECONDS = 5;
-const PLAY_SECONDS = 26;
-const END_LIMIT_SECONDS = 600;
-/**
- * How far ahead, in seconds, the autopilot checks each way it could move: the play scene's pilot
- * looks well ahead and keeps all its lives; the end scene's looks only a moment ahead, so it is
- * caught out once the blocks speed up, as a hurried player is.
- */
-const HORIZON_PLAY = 0.7;
-const HORIZON_END = 0.25;
-const SAMPLE = 1 / 30;
-const DIRECTIONS = [0, -1, 1];
-/** Extra room, each side, it keeps between the paddle and a block. */
-const MARGIN = 10;
-
-/** Seconds until moving in `direction` (-1, 0, 1) runs the paddle into a block; Infinity when it never does. */
-function timeToHit(state, direction, horizon) {
-  const player = state.player;
-  for (let t = SAMPLE; t <= horizon; t += SAMPLE) {
-    const x = Math.min(FIELD.width - player.width, Math.max(0, player.x + direction * PLAYER.speed * t));
-    for (let index = 0; index < state.items.length; index += 1) {
-      const item = state.items[index];
-      if (!item.active || item.kind !== KIND_BLOCK) continue;
-      const y = item.y + item.speed * t;
-      if (y + item.height > player.y && y < player.y + player.height && item.x < x + player.width + MARGIN && item.x + item.width > x - MARGIN) return t;
-    }
-  }
-  return Infinity;
+// A virtual input that drives forward and steers toward the road ahead.
+function autopilotInput(G) {
+  return {
+    axis() {
+      const car = G.player.car;
+      if (!car) return { x: 0, y: 0 };
+      const ahead = { x: car.x + Math.cos(car.angle) * 220, y: car.y + Math.sin(car.angle) * 220 };
+      const road = G.city.nearestRoadPoint(ahead.x, ahead.y);
+      const desired = Math.atan2(road.y - car.y, road.x - car.x);
+      let diff = desired - car.angle;
+      while (diff > Math.PI) diff -= Math.PI * 2;
+      while (diff < -Math.PI) diff += Math.PI * 2;
+      return { x: Math.max(-1, Math.min(1, diff * 2.2)), y: -1 };
+    },
+    down() { return false; },
+    pressed() { return false; },
+    mouse: { x: 640, y: 360, down: false, clicked: false },
+    endFrame() {},
+  };
 }
 
-/** Of the safe ways to move, the one toward the lowest coin (or the centre); else the one that is hit last. */
-function autopilot(state, horizon) {
-  const player = state.player;
-  let coin = null;
-  for (let index = 0; index < state.items.length; index += 1) {
-    const item = state.items[index];
-    if (item.active && item.kind !== KIND_BLOCK && (coin === null || item.y > coin.y)) coin = item;
-  }
-  const target = coin === null ? FIELD.width / 2 : coin.x + coin.width / 2;
-  const centre = player.x + player.width / 2;
-  const wanted = target > centre + 8 ? 1 : target < centre - 8 ? -1 : 0;
-  let best = wanted;
-  let bestTime = timeToHit(state, wanted, horizon);
-  for (let index = 0; index < DIRECTIONS.length && bestTime !== Infinity; index += 1) {
-    const time = timeToHit(state, DIRECTIONS[index], horizon);
-    if (time > bestTime) {
-      bestTime = time;
-      best = DIRECTIONS[index];
-    }
-  }
-  return best;
+function idleInput() {
+  return {
+    axis() { return { x: 0, y: 0 }; },
+    down() { return false; },
+    pressed() { return false; },
+    mouse: { x: 640, y: 360, down: false, clicked: false },
+    endFrame() {},
+  };
 }
 
-/**
- * Set `world` to the named scene (start, play or end; any other name is start) and return the
- * screen to draw over it and the best score to show.
- */
-export function stageShot(name, world) {
-  world.reset();
-  if (name !== 'play' && name !== 'end') {
-    for (let index = 0; index < START_SECONDS / STEP; index += 1) world.step(STEP, 0, true);
-    return { screen: SCREEN_TITLE, best: 0 };
+function stepWorld(G, dt, vinput) {
+  if (G.player.onFoot) updatePlayerOnFoot(G, dt, vinput);
+  else updatePlayerCar(G, dt, vinput);
+  updateTraffic(G, dt);
+  updatePedestrians(G, dt);
+  updatePolice(G, dt);
+  G.wanted.update(dt);
+  updateParticles(G, dt);
+  resolveBumps(G, dt);
+  const p = G.player;
+  const look = p.car ? Math.abs(p.car.speed) * 0.15 : 0;
+  G.cam.x = p.x + Math.cos(p.angle) * look;
+  G.cam.y = p.y + Math.sin(p.angle) * look;
+  G.time += dt;
+}
+
+function finish(G, renderer) {
+  renderer.render(G);
+  renderer.render(G);
+  window.__shotReady = true;
+}
+
+export function stageShot(G, kind, renderer) {
+  G.time = 30; // past the early controls reminder
+  if (kind === 'title') {
+    G.mode = 'title';
+    G.cam.x = 2600;
+    G.cam.y = 1900;
+    G.cam.zoom = 0.8;
+    for (let i = 0; i < 120; i += 1) {
+      updateTraffic(G, STEP);
+      updatePedestrians(G, STEP);
+      updateParticles(G, STEP);
+      G.time += STEP;
+    }
+    finish(G, renderer);
+    return;
   }
-  const limit = name === 'end' ? END_LIMIT_SECONDS : PLAY_SECONDS;
-  const horizon = name === 'end' ? HORIZON_END : HORIZON_PLAY;
-  for (let index = 0; index < limit / STEP; index += 1) {
-    if (world.step(STEP, autopilot(world.state, horizon), false) & EVENT_OVER) break;
+
+  if (kind === 'chase') {
+    // The cover: a Comet GT mid-getaway, three stars, interceptors closing in.
+    G.mode = 'play';
+    const car = makeCar('sports', 1800, 1800, 0, { driver: true });
+    car.color = '#d21f3c';
+    car.speed = 480;
+    G.cars.push(car);
+    G.player.car = car;
+    G.player.onFoot = false;
+    G.player.x = car.x;
+    G.player.y = car.y;
+    G.player.angle = 0;
+    G.cam.zoom = 0.92;
+    startMission(G, 3);
+    G.mission.stage = 1;
+    G.mission.crew = 3;
+    G.mission.target = null;
+    G.mission.label = 'Lose the heat — break line of sight until the stars fall';
+    G.wanted.set(3);
+    G.phone = null;
+    G.banner = { text: 'LOSE THE HEAT!', t: 99, color: '#ff5a5a' };
+    const cop1 = makeCar('police', 1520, 1824, 0, { police: true });
+    cop1.speed = 420;
+    const cop2 = makeCar('police', 1460, 1776, 0, { police: true });
+    cop2.speed = 400;
+    G.cars.push(cop1, cop2);
+    const vinput = autopilotInput(G);
+    for (let i = 0; i < 150; i += 1) stepWorld(G, STEP, vinput);
+    // Re-stage the frame: three stars, the banner, the player's car undamaged,
+    // and both interceptors right behind it where the camera can see them.
+    G.wanted.set(3);
+    G.banner = { text: 'LOSE THE HEAT!', t: 99, color: '#ff5a5a' };
+    car.health = 100;
+    const fx = Math.cos(car.angle);
+    const fy = Math.sin(car.angle);
+    cop1.x = car.x - fx * 175 - fy * 40; cop1.y = car.y - fy * 175 + fx * 40;
+    cop1.angle = car.angle; cop1.speed = 380;
+    cop2.x = car.x - fx * 235 + fy * 44; cop2.y = car.y - fy * 235 - fx * 44;
+    cop2.angle = car.angle; cop2.speed = 360;
+    G.cam.x = car.x + fx * 60;
+    G.cam.y = car.y + fy * 60;
+    finish(G, renderer);
+    return;
   }
-  const over = world.state.lives === 0;
-  return { screen: over ? SCREEN_OVER : SCREEN_PLAY, best: world.state.score };
+
+  if (kind === 'drive') {
+    // Daytime cruise down Palma Ave in a cab, traffic and pedestrians around.
+    G.mode = 'play';
+    const car = makeCar('taxi', 2300, 1300, Math.PI / 2, { driver: true });
+    car.speed = 320;
+    G.cars.push(car);
+    G.player.car = car;
+    G.player.onFoot = false;
+    G.player.x = car.x;
+    G.player.y = car.y;
+    G.player.angle = Math.PI / 2;
+    G.cam.zoom = 0.95;
+    startMission(G, 1);
+    G.phone = null;
+    const vinput = autopilotInput(G);
+    for (let i = 0; i < 120; i += 1) stepWorld(G, STEP, vinput);
+    car.health = 100;
+    finish(G, renderer);
+    return;
+  }
+
+  if (kind === 'foot') {
+    // On foot outside Solmar Bank with the cash, four stars closing in.
+    G.mode = 'play';
+    G.player.x = LANDMARKS.bank.x;
+    G.player.y = LANDMARKS.bank.y + 190;
+    G.player.angle = Math.PI / 2;
+    G.player.onFoot = true;
+    G.cam.zoom = 1.0;
+    startMission(G, 5);
+    G.mission.stage = 2;
+    G.mission.hasCash = true;
+    G.mission.target = { x: LANDMARKS.safehouse.x, y: LANDMARKS.safehouse.y + 110, label: 'Safehouse' };
+    G.mission.label = 'Escape to the Safehouse with the cash — 4 stars of heat';
+    G.wanted.set(4);
+    G.phone = null;
+    G.banner = { text: 'ALARM TRIPPED — 4 STARS — RUN', t: 99, color: '#ff5a5a' };
+    for (const [dx, dy] of [[-250, -130], [260, -110]]) {
+      G.peds.push({
+        kind: 'ped', x: G.player.x + dx, y: G.player.y + dy,
+        angle: 0, speed: 215, target: null, state: 'walk', stateTimer: 0,
+        color: '#1c2f6e', police: true, arrest: 0, down: 0,
+      });
+    }
+    const cop1 = makeCar('police', 2050, 1350, Math.PI, { police: true });
+    cop1.speed = 300;
+    const cop2 = makeCar('police', 1150, 800, 0, { police: true });
+    cop2.speed = 300;
+    G.cars.push(cop1, cop2);
+    const vinput = idleInput();
+    for (let i = 0; i < 50; i += 1) stepWorld(G, STEP, vinput);
+    // Re-stage the frame: four stars, the alarm banner, the player unhurt.
+    G.wanted.set(4);
+    G.banner = { text: 'ALARM TRIPPED — 4 STARS — RUN', t: 99, color: '#ff5a5a' };
+    G.player.health = 100;
+    G.cam.x = G.player.x;
+    G.cam.y = G.player.y;
+    finish(G, renderer);
+    return;
+  }
+
+  // Unknown scene: paint the title.
+  G.mode = 'title';
+  finish(G, renderer);
 }
