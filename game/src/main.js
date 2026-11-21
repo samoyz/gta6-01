@@ -189,7 +189,7 @@ function respray() {
   car.health = 100;
   car.color = ['#d21f3c', '#1f6fd2', '#f5f5f5', '#2e6da4'][G.rng.int(0, 3)];
   G.audio.jingle();
-  G.banner = { text: `RESPRAYED — HEAT CLEARED — $${SPRAY_PRICE}`, t: 2.5, color: '#c084fc' };
+  G.banner = { text: `RESPRAYED: HEAT CLEARED ($${SPRAY_PRICE})`, t: 2.5, color: '#c084fc' };
   G.saveGame();
 }
 

@@ -93,7 +93,7 @@ export function stageShot(G, kind, renderer) {
     G.mission.stage = 1;
     G.mission.crew = 3;
     G.mission.target = null;
-    G.mission.label = 'Lose the heat — break line of sight until the stars fall';
+    G.mission.label = 'Lose the heat. Break line of sight until the stars fall';
     G.wanted.set(3);
     G.phone = null;
     G.banner = { text: 'LOSE THE HEAT!', t: 99, color: '#ff5a5a' };
@@ -154,10 +154,10 @@ export function stageShot(G, kind, renderer) {
     G.mission.stage = 2;
     G.mission.hasCash = true;
     G.mission.target = { x: LANDMARKS.safehouse.x, y: LANDMARKS.safehouse.y + 110, label: 'Safehouse' };
-    G.mission.label = 'Escape to the Safehouse with the cash — 4 stars of heat';
+    G.mission.label = 'Escape to the Safehouse with the cash. 4 stars of heat';
     G.wanted.set(4);
     G.phone = null;
-    G.banner = { text: 'ALARM TRIPPED — 4 STARS — RUN', t: 99, color: '#ff5a5a' };
+    G.banner = { text: 'ALARM TRIPPED: 4 STARS, RUN', t: 99, color: '#ff5a5a' };
     for (const [dx, dy] of [[-250, -130], [260, -110]]) {
       G.peds.push({
         kind: 'ped', x: G.player.x + dx, y: G.player.y + dy,
@@ -174,7 +174,7 @@ export function stageShot(G, kind, renderer) {
     for (let i = 0; i < 50; i += 1) stepWorld(G, STEP, vinput);
     // Re-stage the frame: four stars, the alarm banner, the player unhurt.
     G.wanted.set(4);
-    G.banner = { text: 'ALARM TRIPPED — 4 STARS — RUN', t: 99, color: '#ff5a5a' };
+    G.banner = { text: 'ALARM TRIPPED: 4 STARS, RUN', t: 99, color: '#ff5a5a' };
     G.player.health = 100;
     G.cam.x = G.player.x;
     G.cam.y = G.player.y;

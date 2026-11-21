@@ -501,7 +501,7 @@ function drawHUD(ctx, G) {
     panel(ctx, W / 2 - 280, H - 178, 560, 92);
     ctx.fillStyle = '#ffd76a';
     ctx.font = `bold 14px ${FONT}`;
-    ctx.fillText(`\u260E ${G.phone.name.toUpperCase()} — INCOMING CALL`, W / 2 - 264, H - 150);
+    ctx.fillText(`\u260E ${G.phone.name.toUpperCase()}: INCOMING CALL`, W / 2 - 264, H - 150);
     ctx.fillStyle = '#fff';
     ctx.font = `14px ${FONT}`;
     const words = G.phone.text.split(' ');
@@ -519,7 +519,7 @@ function drawHUD(ctx, G) {
     ctx.fillText(line, W / 2 - 264, ly);
     ctx.fillStyle = 'rgba(255,255,255,0.6)';
     ctx.font = `11px ${FONT}`;
-    ctx.fillText('ENTER — dismiss', W / 2 - 264, H - 96);
+    ctx.fillText('ENTER: dismiss', W / 2 - 264, H - 96);
   }
   // Minimap, bottom left.
   drawMinimap(ctx, G, 20, H - 168, 186, 136);
@@ -545,7 +545,7 @@ function drawHUD(ctx, G) {
     if (Math.abs(car.x - LANDMARKS.spray.x) < 160 && Math.abs(car.y - LANDMARKS.spray.y) < 130 && G.wanted.level > 0 && G.cash >= SPRAY_PRICE) {
       ctx.fillStyle = '#c084fc';
       ctx.font = `bold 13px ${FONT}`;
-      ctx.fillText(`Q — RESPRAY $${SPRAY_PRICE} (clears wanted)`, W - 200, H - 96);
+      ctx.fillText(`Q: RESPRAY $${SPRAY_PRICE} (clears wanted)`, W - 200, H - 96);
     }
   } else {
     ctx.fillStyle = '#fff';
@@ -553,7 +553,7 @@ function drawHUD(ctx, G) {
     ctx.fillText('ON FOOT', W - 200, H - 52);
     ctx.fillStyle = 'rgba(255,255,255,0.7)';
     ctx.font = `12px ${FONT}`;
-    ctx.fillText(`PISTOL  ${p.ammo} / ${PLAYER.ammo}${p.reloadTimer > 0 ? '  — RELOADING…' : ''}`, W - 200, H - 30);
+    ctx.fillText(`PISTOL  ${p.ammo} / ${PLAYER.ammo}${p.reloadTimer > 0 ? '  · RELOADING…' : ''}`, W - 200, H - 30);
   }
   // Context hint, bottom centre.
   const hint = contextHint(G);
@@ -580,10 +580,10 @@ function contextHint(G) {
   const p = G.player;
   if (p.onFoot) {
     const car = nearestCarForHint(G);
-    if (car) return car.driver ? 'E — JACK THE CAR' : 'E — GET IN THE CAR';
+    if (car) return car.driver ? 'E: JACK THE CAR' : 'E: GET IN THE CAR';
     return null;
   }
-  return 'E — GET OUT  ·  SPACE — HANDBRAKE';
+  return 'E: GET OUT  ·  SPACE: HANDBRAKE';
 }
 
 function nearestCarForHint(G) {
@@ -649,7 +649,7 @@ function drawTitle(ctx, G) {
   ctx.fillStyle = 'rgba(255,255,255,0.65)';
   ctx.font = `13px ${FONT}`;
   ctx.fillText('WASD / arrows move · E enter or steal a car · F or click shoot · SPACE handbrake · ESC pause · M mute', W / 2, H - 52);
-  ctx.fillText('An original game. Solmar City, its people and its story are invented here — no affiliation with any commercial series.', W / 2, H - 28);
+  ctx.fillText('An original game. Solmar City, its people and its story are invented here. No affiliation with any commercial series.', W / 2, H - 28);
   if (G.helpOpen) {
     ctx.fillStyle = 'rgba(8,10,18,0.88)';
     rr(ctx, W / 2 - 320, H * 0.3, 640, 260, 12);
@@ -662,9 +662,9 @@ function drawTitle(ctx, G) {
     const lines = [
       'You are Danny Voss, a getaway driver in Solmar City.',
       'Lena calls with jobs: steal a car, do the job, lose the heat, get paid.',
-      'WASD / arrows — drive or walk · SHIFT — run on foot',
-      'E — get in or steal a car (jacking one in view raises your wanted level)',
-      'F or click — shoot (mouse aims) · R — reload · SPACE — handbrake',
+      'WASD / arrows: drive or walk · SHIFT: run on foot',
+      'E: get in or steal a car (jacking one in view raises your wanted level)',
+      'F or click: shoot (mouse aims) · R: reload · SPACE: handbrake',
       'Stars rise when the cops see a crime. Break line of sight to cool off,',
       'or pay $150 at Ray\'s Respray to clear them. Get arrested and you lose $200.',
       'Finish all six jobs to complete the story, then keep earning fares.',
@@ -672,7 +672,7 @@ function drawTitle(ctx, G) {
     lines.forEach((line, i) => ctx.fillText(line, W / 2, H * 0.3 + 66 + i * 24));
     ctx.fillStyle = '#ffd76a';
     ctx.font = `bold 14px ${FONT}`;
-    ctx.fillText('ENTER — back', W / 2, H * 0.3 + 236);
+    ctx.fillText('ENTER: back', W / 2, H * 0.3 + 236);
   }
   ctx.textAlign = 'left';
 }
@@ -771,8 +771,8 @@ export function createRenderer(canvas) {
         ctx.fillStyle = '#ffd76a';
         ctx.lineWidth = 5;
         ctx.strokeStyle = 'rgba(0,0,0,0.7)';
-        ctx.strokeText('STORY COMPLETE — SOLMAR IS YOURS', W / 2, 200);
-        ctx.fillText('STORY COMPLETE — SOLMAR IS YOURS', W / 2, 200);
+        ctx.strokeText('STORY COMPLETE: SOLMAR IS YOURS', W / 2, 200);
+        ctx.fillText('STORY COMPLETE: SOLMAR IS YOURS', W / 2, 200);
         ctx.textAlign = 'left';
       }
     }

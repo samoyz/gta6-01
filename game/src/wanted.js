@@ -17,7 +17,7 @@ export function createWanted(G) {
       wanted.level = Math.min(WANTED_MAX, wanted.level + n);
       wanted.evade = 0;
       wanted.evading = false;
-      G.banner = { text: reason ? `WANTED LEVEL ${wanted.level} — ${reason.toUpperCase()}` : `WANTED LEVEL ${wanted.level}`, t: 2.2, color: '#ff5a5a' };
+      G.banner = { text: reason ? `WANTED LEVEL ${wanted.level}: ${reason.toUpperCase()}` : `WANTED LEVEL ${wanted.level}`, t: 2.2, color: '#ff5a5a' };
     },
     set(n) {
       wanted.level = Math.min(WANTED_MAX, n);
@@ -102,8 +102,8 @@ export function createWanted(G) {
         if (wanted.evade >= EVADE_SECONDS) {
           wanted.level -= 1;
           wanted.evade = 0;
-          G.banner = { text: `HEAT DROPPED — ${wanted.level} STAR${wanted.level === 1 ? '' : 'S'} LEFT`, t: 2, color: '#7ddc8a' };
-          if (wanted.level === 0) G.banner = { text: 'HEAT LOST — YOU ARE CLEAR', t: 2.5, color: '#7ddc8a' };
+          G.banner = { text: `HEAT DROPPED: ${wanted.level} STAR${wanted.level === 1 ? '' : 'S'} LEFT`, t: 2, color: '#7ddc8a' };
+          if (wanted.level === 0) G.banner = { text: 'HEAT LOST: YOU ARE CLEAR', t: 2.5, color: '#7ddc8a' };
         }
       } else {
         wanted.evading = false;

@@ -1,4 +1,4 @@
-// SOLMAR HEAT — config: the city's layout, tuning and palette.
+// SOLMAR HEAT: config, the city's layout, tuning and palette.
 // A sun-soaked coastal city of its own: no names, places or art from any commercial game.
 export const WORLD = { width: 5200, height: 3800 };
 export const ROAD_WIDTH = 92;

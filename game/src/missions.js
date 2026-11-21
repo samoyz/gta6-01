@@ -6,7 +6,7 @@ import { LANDMARKS, MISSION_REWARDS, WORLD } from './config.js';
 export const MISSIONS = [
   {
     id: 'wheels', title: 'WHEELS', from: 'Lena',
-    text: 'Danny. You need wheels before anything else. Jack a car — any car — and bring it to my bar. Try not to make a scene.',
+    text: 'Danny. You need wheels before anything else. Jack a car, any car, and bring it to my bar. Try not to make a scene.',
   },
   {
     id: 'fare', title: 'FARE PLAY', from: 'Lena',
@@ -26,7 +26,7 @@ export const MISSIONS = [
   },
   {
     id: 'bigscore', title: 'THE BIG SCORE', from: 'Lena',
-    text: 'Solmar Bank. Walk in, grab the cash, walk out. Then run — four stars of heat, Danny. Bring it home to the Safehouse and we are made.',
+    text: 'Solmar Bank. Walk in, grab the cash, walk out. Then run. Four stars of heat, Danny. Bring it home to the Safehouse and we are made.',
   },
 ];
 
@@ -90,14 +90,14 @@ export function completeMission(G) {
   const reward = MISSION_REWARDS[m.index];
   G.cash += reward;
   G.audio.jingle();
-  G.banner = { text: `JOB DONE — +$${reward}`, t: 3, color: '#ffd76a' };
+  G.banner = { text: `JOB DONE: +$${reward}`, t: 3, color: '#ffd76a' };
   m.active = false;
   m.target = null;
   m.passenger = null;
   if (m.index >= MISSIONS.length - 1) {
     m.completedAll = true;
     G.storyComplete = true;
-    G.banner = { text: `THE BIG SCORE — +$${reward} — STORY COMPLETE`, t: 4, color: '#ffd76a' };
+    G.banner = { text: `THE BIG SCORE: +$${reward}. STORY COMPLETE`, t: 4, color: '#ffd76a' };
   } else {
     m.index += 1;
     m.nextCallIn = 2.5;
@@ -113,7 +113,7 @@ export function failMission(G, reason) {
   m.failed = true;
   m.failedReason = reason;
   G.audio.fail();
-  G.banner = { text: `JOB FAILED — ${reason}`, t: 3, color: '#ff5a5a' };
+  G.banner = { text: `JOB FAILED: ${reason}`, t: 3, color: '#ff5a5a' };
 }
 
 function near(G, x, y, r) {
@@ -166,8 +166,8 @@ export function updateMission(G, dt) {
         G.wanted.set(2);
         G.audio.pickup();
         m.target = { x: LANDMARKS.safehouse.x, y: LANDMARKS.safehouse.y + 110, label: 'Safehouse' };
-        m.label = 'Deliver the package to the Safehouse — 2 stars of heat';
-        G.banner = { text: 'PACKAGE TAKEN — THE COPS ARE ON YOU', t: 2.5, color: '#ff5a5a' };
+        m.label = 'Deliver the package to the Safehouse. 2 stars of heat';
+        G.banner = { text: 'PACKAGE TAKEN: THE COPS ARE ON YOU', t: 2.5, color: '#ff5a5a' };
       }
     } else if (near(G, m.target.x, m.target.y, 85)) {
       completeMission(G);
@@ -179,8 +179,8 @@ export function updateMission(G, dt) {
         m.crew = 3;
         G.wanted.set(3);
         m.target = null;
-        m.label = 'Lose the heat — break line of sight until the stars fall';
-        G.banner = { text: 'CREW ABOARD — 3 STARS — LOSE THE HEAT', t: 2.5, color: '#ff5a5a' };
+        m.label = 'Lose the heat. Break line of sight until the stars fall';
+        G.banner = { text: 'CREW ABOARD: 3 STARS. LOSE THE HEAT', t: 2.5, color: '#ff5a5a' };
         G.audio.phone();
       }
     } else if (G.wanted.level === 0) {
@@ -210,8 +210,8 @@ export function updateMission(G, dt) {
         m.hasCash = true;
         G.wanted.set(4);
         m.target = { x: LANDMARKS.safehouse.x, y: LANDMARKS.safehouse.y + 110, label: 'Safehouse' };
-        m.label = 'Escape to the Safehouse with the cash — 4 stars of heat';
-        G.banner = { text: 'ALARM TRIPPED — 4 STARS — RUN', t: 2.5, color: '#ff5a5a' };
+        m.label = 'Escape to the Safehouse with the cash. 4 stars of heat';
+        G.banner = { text: 'ALARM TRIPPED: 4 STARS, RUN', t: 2.5, color: '#ff5a5a' };
         G.audio.phone();
       }
     } else if (near(G, m.target.x, m.target.y, 90)) {
@@ -244,7 +244,7 @@ export function updateSideJob(G, dt) {
       job.stage = 1;
       job.timer = 90;
       G.audio.blip();
-      G.banner = { text: `FARE ABOARD — $${job.fare} TO ${job.dest.label.toUpperCase()}`, t: 2, color: '#7ddc8a' };
+      G.banner = { text: `FARE ABOARD: $${job.fare} TO ${job.dest.label.toUpperCase()}`, t: 2, color: '#7ddc8a' };
     }
   } else {
     job.timer -= dt;
@@ -255,7 +255,7 @@ export function updateSideJob(G, dt) {
     } else if (Math.hypot(p.x - job.dest.x, p.y - job.dest.y) < 85) {
       G.cash += job.fare;
       G.audio.jingle();
-      G.banner = { text: `FARE PAID — +$${job.fare}`, t: 2.5, color: '#ffd76a' };
+      G.banner = { text: `FARE PAID: +$${job.fare}`, t: 2.5, color: '#ffd76a' };
       G.stats.jobsDone += 1;
       m.sideJob = null;
       m.sideJobCooldown = 18;
@@ -267,12 +267,12 @@ export function updateSideJob(G, dt) {
 export function currentObjective(G) {
   const m = G.mission;
   if (m.active) return m.label;
-  if (m.failed) return `Job failed: ${m.failedReason} — press ENTER to retry`;
-  if (m.completedAll) return 'Story complete — free roam. Fares wave you down across Solmar.';
+  if (m.failed) return `Job failed: ${m.failedReason}. Press ENTER to retry`;
+  if (m.completedAll) return 'Story complete. Free roam. Fares wave you down across Solmar.';
   if (m.sideJob) {
     return m.sideJob.stage === 0
-      ? `Fare waiting ($${m.sideJob.fare}) — drive up to them`
-      : `Fare aboard — drop them at ${m.sideJob.dest.label}`;
+      ? `Fare waiting ($${m.sideJob.fare}). Drive up to them`
+      : `Fare aboard. Drop them at ${m.sideJob.dest.label}`;
   }
   return 'Lena will call with the next job…';
 }
