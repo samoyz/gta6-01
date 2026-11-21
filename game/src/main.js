@@ -138,7 +138,7 @@ function updateStatus() {
 
 function enterCar() {
   const p = G.player;
-  const car = nearestCar(G, p.x, p.y, 62);
+  const car = nearestCar(G, p.x, p.y, 80);
   if (!car) return;
   if (car.driver) {
     // Jack it: the driver flees on foot, and witnesses call the cops.

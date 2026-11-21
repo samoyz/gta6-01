@@ -588,7 +588,7 @@ function contextHint(G) {
 
 function nearestCarForHint(G) {
   let best = null;
-  let bestD = 60 * 60;
+  let bestD = 80 * 80;
   for (const car of G.cars) {
     if (car.dead) continue;
     const dx = car.x - G.player.x;
