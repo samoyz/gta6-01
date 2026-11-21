@@ -1,5 +1,9 @@
 # SOLMAR HEAT — a Solmar City story
 
+[![make.fun · gta6-01](https://make.fun/badge/gta6-01.svg)](https://make.fun/bounty/gta6-01?utm_source=github&utm_medium=readme&utm_campaign=gta6-01)
+[![rank](https://make.fun/badge/gta6-01/samoyz/gta6-01/rank.svg)](https://make.fun/bounty/gta6-01/leaderboard?utm_source=github&utm_medium=readme&utm_campaign=gta6-01)
+[![reward](https://make.fun/badge/gta6-01/samoyz/gta6-01/reward.svg)](https://make.fun/bounty/gta6-01?utm_source=github&utm_medium=readme&utm_campaign=gta6-01)
+
 An original open-world crime game built for the make.fun gta6-01 bounty
 ("Make GTA 6"). Top-down, playable offline in a desktop browser from static
 files: open `game/index.html` or run `node serve.ts` and visit
