@@ -51,7 +51,7 @@ function createGame(gameSeed) {
     city: createCity(rng),
     cars: [], peds: [], particles: [], skids: [],
     player: {
-      x: LANDMARKS.bar.x, y: LANDMARKS.bar.y + 190, angle: -Math.PI / 2, aim: 0,
+      x: LANDMARKS.bar.x, y: LANDMARKS.bar.y + 190, angle: 0, aim: 0,
       onFoot: true, car: null, health: PLAYER.health, ammo: PLAYER.ammo,
       reloadTimer: 0, shootCooldown: 0, speed: 0,
     },
@@ -81,7 +81,7 @@ function createGame(gameSeed) {
   spawnTraffic(G, 30);
   spawnPedestrians(G, 55);
   // A Comet GT parked near the bar so the first job is a short walk away.
-  const starter = makeCar('sports', LANDMARKS.bar.x + 60, LANDMARKS.bar.y + 210, Math.PI / 2, { driver: false, parked: true });
+  const starter = makeCar('sports', LANDMARKS.bar.x + 60, LANDMARKS.bar.y + 210, -Math.PI / 2, { driver: false, parked: true });
   starter.color = '#d21f3c';
   G.cars.push(starter);
   G.menuItems = titleMenuItems(G);

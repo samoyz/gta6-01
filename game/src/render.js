@@ -571,7 +571,7 @@ function drawHUD(ctx, G) {
     ctx.fillStyle = 'rgba(255,255,255,0.75)';
     ctx.font = `12px ${FONT}`;
     ctx.textAlign = 'center';
-    ctx.fillText('WASD drive / walk · E enter car · F or click shoot · SPACE handbrake · ESC pause · M mute', W / 2, H - 56);
+    ctx.fillText('WASD drive / walk · E enter car · F or click shoot · SPACE handbrake · ESC pause · M mute', W / 2, H - 84);
     ctx.textAlign = 'left';
   }
 }
